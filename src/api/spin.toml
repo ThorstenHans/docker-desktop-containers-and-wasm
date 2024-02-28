@@ -1,0 +1,26 @@
+spin_manifest_version = 2
+
+[application]
+authors = ["Thorsten Hans <thorsten.hans@fermyon.com>"]
+description = ""
+name = "api"
+version = "0.1.0"
+
+[variables]
+db_connection_string = { required = true }
+
+[[trigger.http]]
+route = "/..."
+component = "api"
+
+[component.api]
+allowed_outbound_hosts = ["postgres://pg"]
+exclude_files = ["**/node_modules"]
+source = "target/api.wasm"
+
+[component.api.variables]
+db_connection_string = "{{ db_connection_string }}"
+
+[component.api.build]
+command = "npm run build"
+watch = ["src/**/*.js", "package.json"]

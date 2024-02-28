@@ -1,0 +1,45 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - api
+    networks:
+      - containers-and-wasm-sample
+  api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    platform: wasi/wasm
+    runtime: io.containerd.spin.v2
+    environment:
+      SPIN_VARIABLE_DB_CONNECTION_STRING: postgres://bob:secret@pg/todo
+    depends_on:
+      - pg
+    ports:
+      - 8081:80
+    networks:
+      - containers-and-wasm-sample
+  pg:
+    image: pg
+    build:
+      context: .
+      dockerfile: postgres.Dockerfile
+      target: pg
+    environment:
+      POSTGRES_DB: todo
+      POSTGRES_USER: bob
+      POSTGRES_PASSWORD: secret
+    networks:
+      - containers-and-wasm-sample
+networks:
+  containers-and-wasm-sample:
+    driver: bridge
+    name: containers-and-wasm-sample
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
+          gateway: 10.5.0.1
